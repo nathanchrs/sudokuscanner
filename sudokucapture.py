@@ -1,83 +1,38 @@
-# Sudoku Scanner by nathanchrs
-# 
-# References:
-# http://opencvpython.blogspot.co.id/2012/06/sudoku-solver-part-2.html
-# http://docs.opencv.org/3.1.0/da/d6e/tutorial_py_geometric_transformations.html#gsc.tab=0
-# http://sudokugrab.blogspot.co.id/2009/07/how-does-it-all-work.html
-# http://www.pyimagesearch.com/2014/08/25/4-point-opencv-getperspective-transform-example
-# http://stackoverflow.com/questions/8076889/tutorial-on-opencv-simpleblobdetector
-# OpenCV Python 2 Digits sample
+#!/usr/bin/env python
+
+'''
+This module captures images from a webcam and processes them to find sudoku puzzles.
+The sudoku grid format used by this module is a list of list (9x9) of integer.
+A blank cell is denoted by 0.
+'''
 
 import numpy as np
 import cv2, sys
-from numpy.linalg import norm
+from opencv_functions import prepKNN
 
-WEBCAM_NUMBER = 0
+GAUSSIAN_BLUR_RADIUS = 5 # must be odd
 CROP_PIXELS = 4
 CELL_SIZE = 20
 PROCESS_SQUARE_SIZE = (CELL_SIZE + 2*CROP_PIXELS)*9
 DIGIT_MIN_AREA = (CELL_SIZE*CELL_SIZE)//20
-SAMPLES_FILE = 'data/samples_typeddigits.npy'
-LABELS_FILE = 'data/labels_typeddigits.npy'
+SAMPLES_FILE = 'data/sudoku_digits/samples.npy' # format: a numpy float32 array of CELL_SIZE x CELL_SIZE images
+LABELS_FILE = 'data/sudoku_digits/labels.npy' # format: a numpy array of integers corresponding to each image in SAMPLES_FILE
 KNN_K = 6
 
-def deskew(img):
-    m = cv2.moments(img)
-    if abs(m['mu02']) < 1e-2:
-        return img.copy()
-    skew = m['mu11']/m['mu02']
-    M = np.float32([[1, skew, -0.5*CELL_SIZE*skew], [0, 1, 0]])
-    img = cv2.warpAffine(img, M, (CELL_SIZE, CELL_SIZE), flags=cv2.WARP_INVERSE_MAP | cv2.INTER_LINEAR)
-    return img
-
-def preprocess_simple(digits):
-    return np.float32(digits).reshape(-1, CELL_SIZE*CELL_SIZE) / 255.0
-
-def preprocess_hog(digits):
-    samples = []
-    for img in digits:
-        gx = cv2.Sobel(img, cv2.CV_32F, 1, 0)
-        gy = cv2.Sobel(img, cv2.CV_32F, 0, 1)
-        mag, ang = cv2.cartToPolar(gx, gy)
-        bin_n = 16
-        bin = np.int32(bin_n*ang/(2*np.pi))
-        bin_cells = bin[:10,:10], bin[10:,:10], bin[:10,10:], bin[10:,10:]
-        mag_cells = mag[:10,:10], mag[10:,:10], mag[:10,10:], mag[10:,10:]
-        hists = [np.bincount(b.ravel(), m.ravel(), bin_n) for b, m in zip(bin_cells, mag_cells)]
-        hist = np.hstack(hists)
-
-        # transform to Hellinger kernel
-        eps = 1e-7
-        hist /= hist.sum() + eps
-        hist = np.sqrt(hist)
-        hist /= norm(hist) + eps
-
-        samples.append(hist)
-    return np.float32(samples)
-
-def prepKNN(samples):
-	samples = np.float32(samples).reshape(-1, CELL_SIZE, CELL_SIZE)
-	deskewedSamples = map(deskew, samples)
-	samples = preprocess_hog(deskewedSamples)
-	return samples
-
-if __name__ == '__main__':
-
-	# capture an image from webcam
-	cam = cv2.VideoCapture(WEBCAM_NUMBER)
-	ret_val, inputImage = cam.read()
-	if not ret_val:
-		print 'Failed to read from webcam #' + str(WEBCAM_NUMBER)
-		sys.exit(1)
-
-	cv2.imshow('Input Image', inputImage)
+def read(inputImage):
+	'''
+	Processes inputImage to find a sudoku puzzle.
+	Returns (retval, sudoku, processedImage).
+	retval will be True if a sudoku puzzle is found, and False otherwise.
+	The sudoku grid format used by this module is a list of list (9x9) of integer.
+	A blank cell is denoted by 0.
+	A processedImage with size PROCESS_SQUARE_SIZE x PROCESS_SQUARE_SIZE will be returned.
+	'''
 
 	# pre-process image
 	processedImage = cv2.cvtColor(inputImage, cv2.COLOR_BGR2GRAY)
-	processedImage = cv2.GaussianBlur(processedImage, (5,5), 0)
+	processedImage = cv2.GaussianBlur(processedImage, (GAUSSIAN_BLUR_RADIUS,GAUSSIAN_BLUR_RADIUS), 0)
 	processedImage = cv2.adaptiveThreshold(processedImage, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY_INV, 11, 1)
-
-	cv2.imshow('Thresholded Image', processedImage)
 
 	# find contours in image
 	contours, hierarchy = cv2.findContours(processedImage.copy(), cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
@@ -95,8 +50,7 @@ if __name__ == '__main__':
 				maxArea = area
 
 	if sudokuSquare is None:
-		print 'Sudoku grid not detected.'
-		sys.exit(1)
+		return (False, None, processedImage)
 
 	# order sudoku square points from top-left corner to bottom-left corner, clockwise
 	sudokuSquare = np.squeeze(sudokuSquare)
@@ -119,7 +73,7 @@ if __name__ == '__main__':
 
 	# prepare and train KNN
 	samples = np.load(SAMPLES_FILE)
-	samples = prepKNN(samples)
+	samples = prepKNN(samples, CELL_SIZE)
 	labels = np.load(LABELS_FILE).astype(int)
 	knn = cv2.KNearest()
 	knn.train(samples, labels)
@@ -133,18 +87,37 @@ if __name__ == '__main__':
 			largestContour = contours[np.argmax(map(cv2.contourArea, contours))]
 			if cv2.contourArea(largestContour) >= DIGIT_MIN_AREA:
 				# this cell has a digit, apply knn
-				retval, results, neighborResponses, dists = knn.find_nearest(prepKNN([cell]), KNN_K)
+				retval, results, neighborResponses, dists = knn.find_nearest(prepKNN([cell], CELL_SIZE), KNN_K)
 				sudoku[i] = int(results.ravel()[0])
 
 	sudoku = np.array(sudoku)
 	sudoku = sudoku.reshape(9,9)
-	print sudoku
+	return (True, sudoku, deskewedImage)
 
-	# show the resulting image
-	cv2.imshow('Deskewed Image', deskewedImage)
 
+if __name__ == '__main__':
+
+	WEBCAM_NUMBER = 0
+
+	# capture an image from webcam
+	print "Capturing sudoku image from webcam #" + str(WEBCAM_NUMBER) + "..."
+	cam = cv2.VideoCapture(WEBCAM_NUMBER)
+	retval, inputImage = cam.read()
+	if not retval:
+		print 'Failed to read from webcam #' + str(WEBCAM_NUMBER)
+		sys.exit(1)
+
+	# read sudoku puzzle from image
+	retval, sudoku, processedImage = read(inputImage)
+	if retval:
+		print 'Found a sudoku puzzle:'
+		print sudoku
+		cv2.imshow('Input Image', inputImage)
+		cv2.imshow('Processed Image', processedImage)
+	else:
+		print 'Sudoku puzzle not found in input image.'
+		cv2.imshow('Input Image', inputImage)
+
+	print 'Press any key to exit...'
 	cv2.waitKey(0)
-			
-	# exit
 	cv2.destroyAllWindows()
-
