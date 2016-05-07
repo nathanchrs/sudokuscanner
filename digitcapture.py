@@ -86,7 +86,7 @@ if __name__ == '__main__':
 		sys.exit(1)
 
 	# read digits from image
-	retval, digits, digitImages = read(inputImage, 'sudoku_digits')
+	retval, digits, digitImages = read(inputImage)
 	if retval:
 		print 'Found ' + str(len(digitImages)) + ' digit(s):'
 		print digits

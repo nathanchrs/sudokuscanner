@@ -25,7 +25,9 @@ Currently there are 2 available datasets:
 - `sudoku_digits`: sans-serif 1-9 digits
 - `handwritten_digits`: handwritten 0-9 digits, generated from MNIST samples (see Credits).
 
-There are trainer programs, or programs used to generate datasets, in each dataset's directory.
+There are trainer programs to help generate datasets:
+- `train_sudoku_digits.py`: uses data from sudoku images captured through a webcam, manually labelled by the user.
+- `train_handwritten_digits.py`: uses data from a training image (`data/handwritten_digits/handwritten_digits.png`).
 
 ## Credits
 
