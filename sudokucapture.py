@@ -15,11 +15,9 @@ CROP_PIXELS = 4
 CELL_SIZE = 20
 PROCESS_SQUARE_SIZE = (CELL_SIZE + 2*CROP_PIXELS)*9
 DIGIT_MIN_AREA = (CELL_SIZE*CELL_SIZE)//20
-SAMPLES_FILE = 'data/sudoku_digits/samples.npy' # format: a numpy float32 array of CELL_SIZE x CELL_SIZE images
-LABELS_FILE = 'data/sudoku_digits/labels.npy' # format: a numpy array of integers corresponding to each image in SAMPLES_FILE
 KNN_K = 6
 
-def read(inputImage):
+def read(inputImage, dataset='sudoku_digits'):
 	'''
 	Processes inputImage to find a sudoku puzzle.
 	Returns (retval, sudoku, processedImage).
@@ -28,6 +26,9 @@ def read(inputImage):
 	A blank cell is denoted by 0.
 	A processedImage with size PROCESS_SQUARE_SIZE x PROCESS_SQUARE_SIZE will be returned.
 	'''
+	assert (dataset=='sudoku_digits') or (dataset=='handwritten_digits') # safety check - dataset parameter will be used in file paths
+	samplesFile = 'data/' + dataset + '/samples.npy'
+	labelsFile = 'data/' + dataset + '/labels.npy'
 
 	# pre-process image
 	processedImage = cv2.cvtColor(inputImage, cv2.COLOR_BGR2GRAY)
@@ -50,7 +51,7 @@ def read(inputImage):
 				maxArea = area
 
 	if sudokuSquare is None:
-		return (False, None, processedImage)
+		return (False, [], processedImage)
 
 	# order sudoku square points from top-left corner to bottom-left corner, clockwise
 	sudokuSquare = np.squeeze(sudokuSquare)
@@ -72,9 +73,9 @@ def read(inputImage):
 	cells = [cell[CROP_PIXELS:(PROCESS_SQUARE_SIZE//9 - CROP_PIXELS), CROP_PIXELS:(PROCESS_SQUARE_SIZE//9 - CROP_PIXELS)] for cell in cells]
 
 	# prepare and train KNN
-	samples = np.load(SAMPLES_FILE)
+	samples = np.load(samplesFile)
 	samples = prepKNN(samples, CELL_SIZE)
-	labels = np.load(LABELS_FILE).astype(int)
+	labels = np.load(labelsFile).astype(int)
 	knn = cv2.KNearest()
 	knn.train(samples, labels)
 

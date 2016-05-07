@@ -65,8 +65,12 @@ def preprocess_hog(digits, cellSize):
         samples.append(hist)
     return np.float32(samples)
 
-def prepKNN(samples, cellSize):
+def prepKNN(samples, cellSize, preprocessMethod='hog'):
     '''Applies deskewing and histogram-of-gradients preprocessing to sample images.'''
+    assert (preprocessMethod=='simple') or (preprocessMethod=='hog')
     samples = np.float32(samples).reshape(-1, cellSize, cellSize)
     deskewedSamples = [deskew(sample, cellSize) for sample in samples]
-    return preprocess_hog(deskewedSamples, cellSize)
+    if preprocessMethod == 'simple':
+        return preprocess_simple(deskewedSamples, cellSize)
+    else:
+        return preprocess_hog(deskewedSamples, cellSize)
