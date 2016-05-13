@@ -6,6 +6,7 @@ Main program
 
 import cv2, time
 import plotter, sudokucapture, sudokusolver
+from copy import deepcopy
 
 if __name__ == '__main__':
 
@@ -89,6 +90,7 @@ if __name__ == '__main__':
 
 		# solve sudoku
 
+		originalSudoku = deepcopy(sudoku)
 		plotter.SCREEN.clear()
 		plotter.SCREEN.draw.text((65, 60), 'Solving...')
 		plotter.SCREEN.update()
@@ -147,7 +149,7 @@ if __name__ == '__main__':
 
 		for i in range(9):
 			for j in range(9):
-				if sudoku[i][j] == 0:
+				if originalSudoku[i][j] == 0:
 					plotter.drawDigit(solvedSudoku[i][j], sudokuX + j*sudokuCellWidth + sudokuCellPaddingX, sudokuY + i*sudokuCellHeight + sudokuCellPaddingY, sudokuDigitWidth, sudokuDigitHeight)
 
 		plotter.reset()

@@ -125,7 +125,18 @@ def waitButton(buttonType='any', mode='pressed'):
 			while BUTTON.right:
 				pass
 
+def plotterHeadUp(halfRaise=True):
+	'''Raises the plotter head. If halfRaise is True, the plotter head will only be lifted a bit to reduce time needed.'''
+	if halfRaise:
+		PLOTTER_HEAD_MOTOR.run_timed(time_sp=200, duty_cycle_sp=-50)
+	else:
+		PLOTTER_HEAD_MOTOR.run_timed(time_sp=800, duty_cycle_sp=-50)
+	waitMotor(PLOTTER_HEAD_MOTOR, breakOnStall=True, stallSpeed=20)
 
+def plotterHeadDown():
+	'''Presses the plotter head down.'''
+	PLOTTER_HEAD_MOTOR.run_timed(time_sp=800, duty_cycle_sp=50)
+	waitMotor(PLOTTER_HEAD_MOTOR, breakOnStall=True, stallSpeed=20)
 
 def reset():
 	'''Resets plotter rail, head and roller positions.'''
@@ -133,8 +144,7 @@ def reset():
 	SCREEN.draw.text((60, 60), 'Preparing...')
 	SCREEN.update()
 
-	PLOTTER_HEAD_MOTOR.run_timed(time_sp=800, duty_cycle_sp=-50)
-	waitMotor(PLOTTER_HEAD_MOTOR, breakOnStall=True, stallSpeed=20)
+	plotterHeadUp(halfRaise=False)
 
 	PLOTTER_RAIL_MOTOR.run_forever(duty_cycle_sp=-30)
 	waitSensor(PLOTTER_RAIL_SENSOR, 1)
@@ -193,7 +203,7 @@ def beep(beepType='ok'):
 	elif beepType == 'error':
 		SPEAKER.tone([(2000, 70, 30), (2000, 70, 30), (2000, 70, 30)]).wait()
 	elif beepType == 'done':
-		SPEAKER.tone([(2000, 70, 30), (3000, 70, 30), (400, 200, 0)]).wait()
+		SPEAKER.tone([(2000, 70, 30), (3000, 70, 30), (4000, 200, 0)]).wait()
 
 def gotoXY(x, y):
 	'''
@@ -250,21 +260,8 @@ def gotoXY(x, y):
 def convertCameraCoordinates(cameraX, cameraY):
 	'''Converts camera coordinates (in pixels) to plotter coordinates (in degrees).'''
 	pcx = round((cameraX - 124) * 0.802)
-	pcy = round(((cameraY - 30) * 0.7171) + 80)
+	pcy = round(((cameraY - 30) * 0.7171) + 100)
 	return (pcx, pcy)
-
-def plotterHeadUp(halfRaise=False):
-	'''Raises the plotter head. If halfRaise is True, the plotter head will only be lifted a bit to reduce time needed.'''
-	if halfRaise:
-		PLOTTER_HEAD_MOTOR.run_timed(time_sp=200, duty_cycle_sp=-50)
-	else:
-		PLOTTER_HEAD_MOTOR.run_timed(time_sp=800, duty_cycle_sp=-50)
-	waitMotor(PLOTTER_HEAD_MOTOR, breakOnStall=True, stallSpeed=20)
-
-def plotterHeadDown():
-	'''Presses the plotter head down.'''
-	#PLOTTER_HEAD_MOTOR.run_timed(time_sp=800, duty_cycle_sp=50)
-	#waitMotor(PLOTTER_HEAD_MOTOR, breakOnStall=True, stallSpeed=20)
 
 def drawDigit(digit, x, y, width, height):
 	'''Draws a digit in the specified position, with the specified size.'''
