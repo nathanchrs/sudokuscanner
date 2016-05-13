@@ -38,21 +38,21 @@ def waitMotor(motor, breakOnStall=False):
 	so we use a speed-based stall detection system.
 	in the December 2015 release of ev3dev.
 	'''
-    while 'running' in motor.state:
-        if breakOnStall and (motor.speed == 0):
-        	break
-        pass
+	while 'running' in motor.state:
+		if breakOnStall and (motor.speed == 0):
+			break
+		pass
 
 def waitSensor(sensor, value):
 	'''Wait until the specified sensor's value equals to the specified value.'''
-    while sensor.value() != value:
+	while sensor.value() != value:
 		pass
 
 def reset():
 	'''
 	Resets plotter rail, head and roller positions.
 	'''
-	PLOTTER_HEAD_MOTOR.run_timed(time_sp=700, duty_cycle_sp=50)
+	PLOTTER_HEAD_MOTOR.run_timed(time_sp=800, duty_cycle_sp=-50)
 	waitMotor(PLOTTER_HEAD_MOTOR, breakOnStall=True)
 
 	PLOTTER_RAIL_MOTOR.run_forever(duty_cycle_sp=-30)
