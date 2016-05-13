@@ -7,7 +7,7 @@ A blank cell is denoted by 0.
 '''
 
 import numpy as np
-import cv2, sys
+import cv2, sys, os
 from opencv_functions import prepKNN
 
 SCRIPT_DIRECTORY = os.path.dirname(os.path.realpath(__file__)) # needed because ev3's brickman messes with relative paths - see https://github.com/ev3dev/ev3dev/issues/263
