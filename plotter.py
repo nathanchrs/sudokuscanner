@@ -143,6 +143,7 @@ def reset():
 	PLOTTER_RAIL_MOTOR.stop_command = 'brake'
 
 	ROLLER_MOTOR.stop_command = 'brake'
+	PAPER_FEED_SENSOR.mode = 'COL-COLOR'
 	if PAPER_FEED_SENSOR.value() != PAPER_FEED_EMPTY_COLOR:
 		ROLLER_MOTOR.run_forever(duty_cycle_sp=-40)
 		waitSensor(PAPER_FEED_SENSOR, PAPER_FEED_EMPTY_COLOR)
@@ -171,6 +172,28 @@ def feedPaper():
 	SCREEN.clear()
 	SCREEN.draw.text((35, 60), 'Paper in position')
 	SCREEN.update()
+
+def unfeedPaper():
+	'''Cancel operation, return paper to starting position.'''
+	ROLLER_MOTOR.run_forever(duty_cycle_sp=-40)
+	waitSensor(PAPER_FEED_SENSOR, PAPER_FEED_EMPTY_COLOR)
+	ROLLER_MOTOR.run_to_rel_pos(position_sp=-120, duty_cycle_sp=25)
+	waitMotor(ROLLER_MOTOR)
+
+def beep(beepType='ok'):
+	'''Emit sounds according to beepType: ok, starting, ready, warning, error, done.'''
+	if beepType == 'ok':
+		plotter.SPEAKER.tone([(3000, 200, 200)]).wait()
+	elif beepType == 'starting':
+		plotter.SPEAKER.tone([(2000, 200, 200)]).wait()
+	elif beepType == 'ready':
+		plotter.SPEAKER.tone([(2000, 70, 30), (3000, 200, 0)]).wait()
+	elif beepType == 'warning':
+		plotter.SPEAKER.tone([(2000, 70, 30), (2000, 70, 30)]).wait()
+	elif beepType == 'error':
+		plotter.SPEAKER.tone([(2000, 70, 30), (2000, 70, 30), (2000, 70, 30)]).wait()
+	elif beepType == 'done':
+		plotter.SPEAKER.tone([(2000, 70, 30), (3000, 70, 30), (400, 200, 0)]).wait()
 
 def gotoXY(x, y):
 	'''

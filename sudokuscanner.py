@@ -4,14 +4,14 @@
 Main program
 '''
 
-import cv2
+import cv2, time
 import plotter, sudokucapture, sudokusolver
 
 if __name__ == '__main__':
 
-	plotter.SPEAKER.tone([(2000, 200, 200)]).wait()
+	plotter.beep('starting')
 	plotter.reset()
-	plotter.SPEAKER.tone([(2000, 70, 30), (3000, 200, 0)]).wait()
+	plotter.beep('ready')
 
 	while True:
 		plotter.SCREEN.clear()
@@ -22,11 +22,11 @@ if __name__ == '__main__':
 
 		# feed and position paper
 
-		plotter.SPEAKER.tone([(3000, 200, 200)]).wait()
+		plotter.beep('ok')
 		plotter.feedPaper()
 		plotter.gotoXY(plotter.MAX_X, 300)
 
-		plotter.SPEAKER.tone([(3000, 200, 200)]).wait()
+		plotter.beep('ok')
 		plotter.SCREEN.clear()
 		plotter.SCREEN.draw.text((10, 30), 'Please position the sudoku')
 		plotter.SCREEN.draw.text((20, 50), 'puzzle under the camera')
@@ -42,13 +42,14 @@ if __name__ == '__main__':
 				plotter.ROLLER_MOTOR.run_forever(duty_cycle_sp=20)
 			elif plotter.BUTTON.enter:
 				plotter.ROLLER_MOTOR.stop()
-				plotter.SPEAKER.tone([(3000, 200, 200)]).wait()
+				plotter.beep('ok')
 				break
 			elif plotter.BUTTON.backspace:
 				plotter.SCREEN.clear()
 				plotter.SCREEN.draw.text((30, 60), 'Operation cancelled')
 				plotter.SCREEN.update()
-				plotter.SPEAKER.tone([(2000, 70, 30), (2000, 70, 30)]).wait()
+				plotter.unfeedPaper()
+				plotter.beep('warning')
 				plotter.waitButton(buttonType='any')
 				cancelOperation = True
 				break
@@ -65,26 +66,43 @@ if __name__ == '__main__':
 		cam = cv2.VideoCapture(plotter.WEBCAM_NUMBER)
 		retval, inputImage = cam.read()
 		if not retval:
-			plotter.SPEAKER.tone([(2000, 70, 30), (2000, 70, 30), (2000, 70, 30)]).wait()
 			plotter.SCREEN.clear()
 			plotter.SCREEN.draw.text((10, 60), 'Failed to access camera #' + str(plotter.WEBCAM_NUMBER))
 			plotter.SCREEN.update()
+			plotter.unfeedPaper()
+			plotter.beep('error')
 			plotter.waitButton(buttonType='any')
-			sys.exit(1)
+			continue
 
 		plotter.SCREEN.clear()
-		plotter.SCREEN.draw.text((35, 60), 'Processing image...')
+		plotter.SCREEN.draw.text((37, 60), 'Processing image...')
 		plotter.SCREEN.update()
 		retval, sudoku, processedImage, sudokuPosition = sudokucapture.read(inputImage)
 		if not retval:
 			plotter.SCREEN.clear()
 			plotter.SCREEN.draw.text((10, 60), 'Sudoku puzzle not detected')
 			plotter.SCREEN.update()
-			plotter.SPEAKER.tone([(2000, 70, 30), (2000, 70, 30)]).wait()
+			plotter.unfeedPaper()
+			plotter.beep('warning')
 			plotter.waitButton(buttonType='any')
 			continue
-		
-		# found sudoku, show on screen
+
+		# solve sudoku
+
+		plotter.SCREEN.clear()
+		plotter.SCREEN.draw.text((65, 60), 'Solving...')
+		plotter.SCREEN.update()
+		retval, solvedSudoku = sudokusolver.solve(sudoku)
+		if not retval:
+			plotter.SCREEN.clear()
+			plotter.SCREEN.draw.text((35, 60), 'Solution not found')
+			plotter.SCREEN.update()
+			plotter.unfeedPaper()
+			plotter.beep('warning')
+			plotter.waitButton(buttonType='any')
+			continue
+
+		# show solved sudoku on screen
 
 		plotter.SCREEN.clear()
 		lineY = 8
@@ -95,17 +113,17 @@ if __name__ == '__main__':
 				for j in range(3):
 					for k in range(3):
 						c = j*3 + k
-						line += str(sudoku[b][c])
+						line += str(solvedSudoku[b][c])
 						if k < 2:
 							line += ' '
 					if j < 2:
 						line += ' | '
-				plotter.SCREEN.draw.text((25, lineY), line)
+				plotter.SCREEN.draw.text((26, lineY), line)
 				lineY += 10
 			if i < 2:
-				plotter.SCREEN.draw.text((25, lineY), '----------------------')
+				plotter.SCREEN.draw.text((24, lineY), '----------------------')
 				lineY += 10
 		plotter.SCREEN.update()
 
-		plotter.SPEAKER.tone([(3000, 200, 200)]).wait()
+		plotter.beep('ok')
 		plotter.waitButton(buttonType='any')
