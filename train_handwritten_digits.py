@@ -9,10 +9,12 @@ import numpy as np
 import cv2
 from opencv_functions import prepKNN
 
+SCRIPT_DIRECTORY = os.path.dirname(os.path.realpath(__file__)) # needed because ev3's brickman messes with relative paths - see https://github.com/ev3dev/ev3dev/issues/263
+
 CELL_SIZE = 20
-TRAINING_IMAGE_FILE = 'data/handwritten_digits/handwritten_digits.png'
-SAMPLES_FILE = 'data/handwritten_digits/samples.npy'
-LABELS_FILE = 'data/handwritten_digits/labels.npy'
+TRAINING_IMAGE_FILE = SCRIPT_DIRECTORY + '/data/handwritten_digits/handwritten_digits.png'
+SAMPLES_FILE = SCRIPT_DIRECTORY + '/data/handwritten_digits/samples.npy'
+LABELS_FILE = SCRIPT_DIRECTORY + '/data/handwritten_digits/labels.npy'
 
 # load training image
 print 'Loading training image from ' + TRAINING_IMAGE_FILE + '...'

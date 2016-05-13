@@ -8,6 +8,8 @@ import numpy as np
 import cv2, sys
 from opencv_functions import mosaic, prepKNN
 
+SCRIPT_DIRECTORY = os.path.dirname(os.path.realpath(__file__)) # needed because ev3's brickman messes with relative paths - see https://github.com/ev3dev/ev3dev/issues/263
+
 GAUSSIAN_BLUR_RADIUS = 11 # must be odd
 CELL_SIZE = 20
 CELL_SPACING = 2
@@ -24,8 +26,8 @@ def read(inputImage, dataset='handwritten_digits'):
 	in numpy float32 array format.
 	'''
 	assert (dataset=='sudoku_digits') or (dataset=='handwritten_digits') # safety check - dataset parameter will be used in file paths
-	samplesFile = 'data/' + dataset + '/samples.npy'
-	labelsFile = 'data/' + dataset + '/labels.npy'
+	samplesFile = SCRIPT_DIRECTORY + '/data/' + dataset + '/samples.npy'
+	labelsFile = SCRIPT_DIRECTORY + '/data/' + dataset + '/labels.npy'
 
 	# pre-process image
 	processedImage = cv2.cvtColor(inputImage, cv2.COLOR_BGR2GRAY)

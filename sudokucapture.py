@@ -10,6 +10,8 @@ import numpy as np
 import cv2, sys
 from opencv_functions import prepKNN
 
+SCRIPT_DIRECTORY = os.path.dirname(os.path.realpath(__file__)) # needed because ev3's brickman messes with relative paths - see https://github.com/ev3dev/ev3dev/issues/263
+
 GAUSSIAN_BLUR_RADIUS = 5 # must be odd
 CROP_PIXELS = 4
 CELL_SIZE = 20
@@ -17,18 +19,21 @@ PROCESS_SQUARE_SIZE = (CELL_SIZE + 2*CROP_PIXELS)*9
 DIGIT_MIN_AREA = (CELL_SIZE*CELL_SIZE)//20
 KNN_K = 6
 
-def read(inputImage, dataset='sudoku_digits'):
+def read(inputImage, dataset='sudoku_digits', returnSplitImages=False):
 	'''
 	Processes inputImage to find a sudoku puzzle.
-	Returns (retval, sudoku, processedImage).
+	If returnSplitImages is True, it will return an array of cell images, otherwise it will return the whole sudoku image.
+	Returns (retval, sudoku, processedImage, sudokuPoints).
 	retval will be True if a sudoku puzzle is found, and False otherwise.
+	sudokuPoints will be an array of 4 points (top-left to bottom-left, clockwise) of the coordinates of the sudoku grid
+	found in the image. Each point will be an array of 2 floats.
 	The sudoku grid format used by this module is a list of list (9x9) of integer.
 	A blank cell is denoted by 0.
 	A processedImage with size PROCESS_SQUARE_SIZE x PROCESS_SQUARE_SIZE will be returned.
 	'''
 	assert (dataset=='sudoku_digits') or (dataset=='handwritten_digits') # safety check - dataset parameter will be used in file paths
-	samplesFile = 'data/' + dataset + '/samples.npy'
-	labelsFile = 'data/' + dataset + '/labels.npy'
+	samplesFile = SCRIPT_DIRECTORY + '/data/' + dataset + '/samples.npy'
+	labelsFile = SCRIPT_DIRECTORY + '/data/' + dataset + '/labels.npy'
 
 	# pre-process image
 	processedImage = cv2.cvtColor(inputImage, cv2.COLOR_BGR2GRAY)
@@ -51,7 +56,7 @@ def read(inputImage, dataset='sudoku_digits'):
 				maxArea = area
 
 	if sudokuSquare is None:
-		return (False, [], processedImage)
+		return (False, [], processedImage, [])
 
 	# order sudoku square points from top-left corner to bottom-left corner, clockwise
 	sudokuSquare = np.squeeze(sudokuSquare)
@@ -93,7 +98,10 @@ def read(inputImage, dataset='sudoku_digits'):
 
 	sudoku = np.array(sudoku)
 	sudoku = sudoku.reshape(9,9)
-	return (True, sudoku, deskewedImage)
+	if returnSplitImages:
+		return (True, sudoku, samples, orderedSudokuSquare.tolist())
+	else:
+		return (True, sudoku, deskewedImage, orderedSudokuSquare.tolist())
 
 
 if __name__ == '__main__':
@@ -109,7 +117,7 @@ if __name__ == '__main__':
 		sys.exit(1)
 
 	# read sudoku puzzle from image
-	retval, sudoku, processedImage = read(inputImage)
+	retval, sudoku, processedImage, pos = read(inputImage)
 	if retval:
 		print 'Found a sudoku puzzle:'
 		print sudoku
