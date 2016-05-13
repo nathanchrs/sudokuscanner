@@ -25,7 +25,7 @@ def read(inputImage, dataset='sudoku_digits', returnSplitImages=False):
 	If returnSplitImages is True, it will return an array of cell images, otherwise it will return the whole sudoku image.
 	Returns (retval, sudoku, processedImage, sudokuPoints).
 	retval will be True if a sudoku puzzle is found, and False otherwise.
-	sudokuPoints will be an array of 4 points (top-left to bottom-left, clockwise) of the coordinates of the sudoku grid
+	sudokuPoints will be an array of 4 points (top-left to top-right, counter-clockwise) of the coordinates of the sudoku grid
 	found in the image. Each point will be an array of 2 floats.
 	The sudoku grid format used by this module is a list of list (9x9) of integer.
 	A blank cell is denoted by 0.
@@ -58,7 +58,7 @@ def read(inputImage, dataset='sudoku_digits', returnSplitImages=False):
 	if sudokuSquare is None:
 		return (False, [], processedImage, [])
 
-	# order sudoku square points from top-left corner to bottom-left corner, clockwise
+	# order sudoku square points from top-left corner to top-right corner, counter-clockwise
 	sudokuSquare = np.squeeze(sudokuSquare)
 	orderedSudokuSquare = np.zeros((4,2), dtype='float32')
 	xySum = sudokuSquare.sum(axis=1)

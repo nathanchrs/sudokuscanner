@@ -31,7 +31,7 @@ WEBCAM_NUMBER = 0 # USB webcam
 
 PAPER_FEED_EMPTY_COLOR = 1 # black
 MAX_X = 350
-MAX_Y = 710
+MAX_Y = 700
 
 # color sensor values:
 # - 0: No color
@@ -183,17 +183,17 @@ def unfeedPaper():
 def beep(beepType='ok'):
 	'''Emit sounds according to beepType: ok, starting, ready, warning, error, done.'''
 	if beepType == 'ok':
-		plotter.SPEAKER.tone([(3000, 200, 200)]).wait()
+		SPEAKER.tone([(3000, 200, 200)]).wait()
 	elif beepType == 'starting':
-		plotter.SPEAKER.tone([(2000, 200, 200)]).wait()
+		SPEAKER.tone([(2000, 200, 200)]).wait()
 	elif beepType == 'ready':
-		plotter.SPEAKER.tone([(2000, 70, 30), (3000, 200, 0)]).wait()
+		SPEAKER.tone([(2000, 70, 30), (3000, 200, 0)]).wait()
 	elif beepType == 'warning':
-		plotter.SPEAKER.tone([(2000, 70, 30), (2000, 70, 30)]).wait()
+		SPEAKER.tone([(2000, 70, 30), (2000, 70, 30)]).wait()
 	elif beepType == 'error':
-		plotter.SPEAKER.tone([(2000, 70, 30), (2000, 70, 30), (2000, 70, 30)]).wait()
+		SPEAKER.tone([(2000, 70, 30), (2000, 70, 30), (2000, 70, 30)]).wait()
 	elif beepType == 'done':
-		plotter.SPEAKER.tone([(2000, 70, 30), (3000, 70, 30), (400, 200, 0)]).wait()
+		SPEAKER.tone([(2000, 70, 30), (3000, 70, 30), (400, 200, 0)]).wait()
 
 def gotoXY(x, y):
 	'''
@@ -247,6 +247,106 @@ def gotoXY(x, y):
 	if dx > 0:
 		waitMotor(PLOTTER_RAIL_MOTOR)
 
+def convertCameraCoordinates(cameraX, cameraY):
+	'''Converts camera coordinates (in pixels) to plotter coordinates (in degrees).'''
+	pcx = round((cameraX - 124) * 0.802)
+	pcy = round(((cameraY - 30) * 0.7171) + 80)
+	return (pcx, pcy)
 
+def plotterHeadUp(halfRaise=False):
+	'''Raises the plotter head. If halfRaise is True, the plotter head will only be lifted a bit to reduce time needed.'''
+	if halfRaise:
+		PLOTTER_HEAD_MOTOR.run_timed(time_sp=200, duty_cycle_sp=-50)
+	else:
+		PLOTTER_HEAD_MOTOR.run_timed(time_sp=800, duty_cycle_sp=-50)
+	waitMotor(PLOTTER_HEAD_MOTOR, breakOnStall=True, stallSpeed=20)
 
+def plotterHeadDown():
+	'''Presses the plotter head down.'''
+	#PLOTTER_HEAD_MOTOR.run_timed(time_sp=800, duty_cycle_sp=50)
+	#waitMotor(PLOTTER_HEAD_MOTOR, breakOnStall=True, stallSpeed=20)
 
+def drawDigit(digit, x, y, width, height):
+	'''Draws a digit in the specified position, with the specified size.'''
+	plotterHeadUp()
+	if digit == 0:
+		gotoXY(x, y)
+		plotterHeadDown()
+		gotoXY(x, y+height)
+		gotoXY(x+width, y+height)
+		gotoXY(x+width, y)
+		gotoXY(x, y)
+	elif digit == 1:
+		gotoXY(x+width/3, y+height/5)
+		plotterHeadDown()
+		gotoXY(x+width/2, y)
+		gotoXY(x+width/2, y+height)
+	elif digit == 2:
+		gotoXY(x, y)
+		plotterHeadDown()
+		gotoXY(x+width, y)
+		gotoXY(x+width, y+height/2)
+		gotoXY(x, y+height/2)
+		gotoXY(x, y+height)
+		gotoXY(x+width, y+height)
+	elif digit == 3:
+		gotoXY(x, y)
+		plotterHeadDown()
+		gotoXY(x+width, y)
+		gotoXY(x+width, y+height/2)
+		gotoXY(x, y+height/2)
+		plotterHeadUp()
+		gotoXY(x+width, y+height/2)
+		plotterHeadDown()
+		gotoXY(x+width, y+height)
+		gotoXY(x, y+height)
+	elif digit == 4:
+		gotoXY(x, y)
+		plotterHeadDown()
+		gotoXY(x, y+height/2)
+		gotoXY(x+width, y+height/2)
+		plotterHeadUp()
+		gotoXY(x+width, y)
+		plotterHeadDown()
+		gotoXY(x+width, y+height)
+	elif digit == 5:
+		gotoXY(x+width, y)
+		plotterHeadDown()
+		gotoXY(x, y)
+		gotoXY(x, y+height/2)
+		gotoXY(x+width, y+height/2)
+		gotoXY(x+width, y+height)
+		gotoXY(x, y+height)
+	elif digit == 6:
+		gotoXY(x+width, y)
+		plotterHeadDown()
+		gotoXY(x, y)
+		gotoXY(x, y+height)
+		gotoXY(x+width, y+height)
+		gotoXY(x+width, y+height/2)
+		gotoXY(x, y+height/2)
+	elif digit == 7:
+		gotoXY(x, y)
+		plotterHeadDown()
+		gotoXY(x+width, y)
+		gotoXY(x, y+height)
+	elif digit == 8:
+		gotoXY(x, y)
+		plotterHeadDown()
+		gotoXY(x, y+height)
+		gotoXY(x+width, y+height)
+		gotoXY(x+width, y)
+		gotoXY(x, y)
+		plotterHeadUp()
+		gotoXY(x, y+height/2)
+		plotterHeadDown()
+		gotoXY(x+width, y+height/2)
+	elif digit == 9:
+		gotoXY(x+width, y+height/2)
+		plotterHeadDown()
+		gotoXY(x, y+height/2)
+		gotoXY(x, y)
+		gotoXY(x+width, y)
+		gotoXY(x+width, y+height)
+		gotoXY(x, y+height)
+	plotterHeadUp()

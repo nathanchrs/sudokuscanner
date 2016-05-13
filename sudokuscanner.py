@@ -125,5 +125,30 @@ if __name__ == '__main__':
 				lineY += 10
 		plotter.SCREEN.update()
 
-		plotter.beep('ok')
-		plotter.waitButton(buttonType='any')
+		# calculate positions of digits
+
+		sudokuTopLeftX, sudokuTopLeftY = plotter.convertCameraCoordinates(sudokuPosition[0][0], sudokuPosition[0][1])
+		sudokuBottomLeftX, sudokuBottomLeftY = plotter.convertCameraCoordinates(sudokuPosition[1][0], sudokuPosition[1][1])
+		sudokuBottomRightX, sudokuBottomRightY = plotter.convertCameraCoordinates(sudokuPosition[2][0], sudokuPosition[2][1])
+		sudokuTopRightX, sudokuTopRightY = plotter.convertCameraCoordinates(sudokuPosition[3][0], sudokuPosition[3][1])
+
+		sudokuX = (sudokuTopLeftX + sudokuBottomLeftX) / 2.0
+		sudokuY = (sudokuTopLeftY + sudokuTopRightY) / 2.0
+		sudokuWidth = (sudokuTopRightX + sudokuBottomRightX - sudokuTopLeftX - sudokuBottomLeftX) / 2.0
+		sudokuHeight = (sudokuBottomLeftY + sudokuBottomRightY - sudokuTopLeftY - sudokuTopRightY) / 2.0
+		sudokuCellWidth = sudokuWidth / 9.0
+		sudokuCellHeight = sudokuHeight / 9.0
+		sudokuCellPaddingX = sudokuWidth * 0.03
+		sudokuCellPaddingY = sudokuHeight * 0.02
+		sudokuDigitWidth = sudokuHeight * 0.04
+		sudokuDigitHeight = sudokuHeight * 0.06
+
+		# draw digits
+
+		for i in range(9):
+			for j in range(9):
+				if sudoku[i][j] == 0:
+					plotter.drawDigit(solvedSudoku[i][j], sudokuX + j*sudokuCellWidth + sudokuCellPaddingX, sudokuY + i*sudokuCellHeight + sudokuCellPaddingY, sudokuDigitWidth, sudokuDigitHeight)
+
+		plotter.reset()
+		plotter.beep('done')
