@@ -13,7 +13,6 @@ I/O ports:
 '''
 
 import ev3dev.ev3 as ev3
-import time
 
 # hardware configuration
 
@@ -26,12 +25,13 @@ PAPER_FEED_SENSOR = ev3.ColorSensor('2')
 
 SCREEN = ev3.Screen()
 BUTTON = ev3.Button()
+SPEAKER = ev3.Sound
 
 WEBCAM_NUMBER = 0 # USB webcam
 
 PAPER_FEED_EMPTY_COLOR = 1 # black
 MAX_X = 350
-MAX_Y = 350
+MAX_Y = 710
 
 # color sensor values:
 # - 0: No color
@@ -146,6 +146,7 @@ def reset():
 	if PAPER_FEED_SENSOR.value() != PAPER_FEED_EMPTY_COLOR:
 		ROLLER_MOTOR.run_forever(duty_cycle_sp=-40)
 		waitSensor(PAPER_FEED_SENSOR, PAPER_FEED_EMPTY_COLOR)
+		ROLLER_MOTOR.stop()
 
 	SCREEN.clear()
 	SCREEN.draw.text((45, 60), 'Reset complete')
@@ -154,14 +155,14 @@ def reset():
 def feedPaper():
 	'''Positions paper, resets roller motor.'''
 	SCREEN.clear()
-	SCREEN.draw.text((45, 60), 'F5eeding paper...')
+	SCREEN.draw.text((45, 60), 'Feeding paper...')
 	SCREEN.update()
 
 	ROLLER_MOTOR.run_forever(duty_cycle_sp=40)
 	waitSensor(PAPER_FEED_SENSOR, PAPER_FEED_EMPTY_COLOR, negate=True)
-	ROLLER_MOTOR.run_forever(duty_cycle_sp=-10)
+	ROLLER_MOTOR.run_forever(duty_cycle_sp=-15)
 	waitSensor(PAPER_FEED_SENSOR, PAPER_FEED_EMPTY_COLOR)
-	ROLLER_MOTOR.run_to_rel_pos(position_sp=-90, duty_cycle_sp=10)
+	ROLLER_MOTOR.run_to_rel_pos(position_sp=-90, duty_cycle_sp=15)
 	waitMotor(ROLLER_MOTOR)
 
 	ROLLER_MOTOR.reset()
@@ -171,12 +172,64 @@ def feedPaper():
 	SCREEN.draw.text((35, 60), 'Paper in position')
 	SCREEN.update()
 
+def gotoXY(x, y):
+	'''
+	Positions the plotter head at the specified coordinate.
+	(0,0) is at the top-left corner of the paper.
+	Paper is fed bottom-first.
+	'''
+	x = MAX_X - x
+	y = MAX_Y - y
+	if x < 0:
+		x = 0
+	if x > MAX_X:
+		x = MAX_X
+	if y < 0 :
+		y = 0
+	if y > MAX_Y:
+		y = MAX_Y
+
+	maxDCX = 35
+	maxDCY = 32
+	minDCX = 10
+	minDCY = 8
+
+	dx = abs(PLOTTER_RAIL_MOTOR.position - x)
+	dy = abs(ROLLER_MOTOR.position - y)
+
+	if dx > dy:
+		dcx = maxDCX
+		if dx > 0:
+			dcy = maxDCY * dy / dx 
+		else:
+			dcy = maxDCY
+	else:
+		dcy = maxDCY
+		if dy > 0:
+			dcx = maxDCX * dx / dy
+		else:
+			dcx = maxDCX
+
+	if dcx < minDCX:
+		dcx = minDCX
+	if dcy < minDCY:
+		dcy = minDCY
+
+	if dy > 0:
+		ROLLER_MOTOR.run_to_abs_pos(position_sp=y, duty_cycle_sp=dcy)
+	if dx > 0:
+		PLOTTER_RAIL_MOTOR.run_to_abs_pos(position_sp=x, duty_cycle_sp=dcx)
+	if dy > 0:
+		waitMotor(ROLLER_MOTOR)
+	if dx > 0:
+		waitMotor(PLOTTER_RAIL_MOTOR)
+
 
 if __name__ == '__main__':
 
-	ev3.Sound.tone([(2000, 200, 200)]).wait()
+	SPEAKER.tone([(2000, 200, 200)]).wait()
 	reset()
-	ev3.Sound.tone([(2000, 70, 30), (3000, 200, 0)]).wait()
+	SPEAKER.tone([(2000, 70, 30), (3000, 200, 0)]).wait()
 
 	while True:
 		SCREEN.clear()
@@ -184,6 +237,30 @@ if __name__ == '__main__':
 		SCREEN.draw.text((5, 70), 'Insert paper and press enter')
 		SCREEN.update()
 		waitButton(buttonType='enter')
-		
+
+		SPEAKER.tone([(3000, 200, 200)]).wait()
 		feedPaper()
+		gotoXY(MAX_X, 300)
+
+		SPEAKER.tone([(3000, 200, 200)]).wait()
+		SCREEN.clear()
+		SCREEN.draw.text((10, 30), 'Please position the sudoku')
+		SCREEN.draw.text((20, 50), 'puzzle under the camera')
+		SCREEN.draw.text((15, 70), 'using the left and right')
+		SCREEN.draw.text((12, 90), 'buttons, then press enter')
+		SCREEN.update()
+
+		while True:
+			if BUTTON.left and (ROLLER_MOTOR.position > 0):
+				ROLLER_MOTOR.run_forever(duty_cycle_sp=-20)
+			elif BUTTON.right and (ROLLER_MOTOR.position < MAX_Y):
+				ROLLER_MOTOR.run_forever(duty_cycle_sp=20)
+			elif BUTTON.enter:
+				ROLLER_MOTOR.stop()
+				SPEAKER.tone([(3000, 200, 200)]).wait()
+				break
+			else:
+				ROLLER_MOTOR.stop()
+
+
 
