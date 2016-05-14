@@ -13,6 +13,7 @@ I/O ports:
 '''
 
 import ev3dev.ev3 as ev3
+import time
 
 # hardware configuration
 
@@ -31,7 +32,7 @@ WEBCAM_NUMBER = 0 # USB webcam
 
 PAPER_FEED_EMPTY_COLOR = 1 # black
 MAX_X = 350
-MAX_Y = 700
+MAX_Y = 16000
 
 # color sensor values:
 # - 0: No color
@@ -131,12 +132,13 @@ def plotterHeadUp(halfRaise=True):
 		PLOTTER_HEAD_MOTOR.run_timed(time_sp=200, duty_cycle_sp=-50)
 	else:
 		PLOTTER_HEAD_MOTOR.run_timed(time_sp=800, duty_cycle_sp=-50)
-	waitMotor(PLOTTER_HEAD_MOTOR, breakOnStall=True, stallSpeed=20)
+	waitMotor(PLOTTER_HEAD_MOTOR, breakOnStall=True, stallSpeed=30)
 
 def plotterHeadDown():
 	'''Presses the plotter head down.'''
 	PLOTTER_HEAD_MOTOR.run_timed(time_sp=800, duty_cycle_sp=50)
-	waitMotor(PLOTTER_HEAD_MOTOR, breakOnStall=True, stallSpeed=20)
+	waitMotor(PLOTTER_HEAD_MOTOR, breakOnStall=True, stallSpeed=30)
+	time.sleep(0.5)
 
 def reset():
 	'''Resets plotter rail, head and roller positions.'''
@@ -155,7 +157,7 @@ def reset():
 	ROLLER_MOTOR.stop_command = 'brake'
 	PAPER_FEED_SENSOR.mode = 'COL-COLOR'
 	if PAPER_FEED_SENSOR.value() != PAPER_FEED_EMPTY_COLOR:
-		ROLLER_MOTOR.run_forever(duty_cycle_sp=-40)
+		ROLLER_MOTOR.run_forever(duty_cycle_sp=100)
 		waitSensor(PAPER_FEED_SENSOR, PAPER_FEED_EMPTY_COLOR)
 		ROLLER_MOTOR.stop()
 
@@ -169,11 +171,12 @@ def feedPaper():
 	SCREEN.draw.text((45, 60), 'Feeding paper...')
 	SCREEN.update()
 
-	ROLLER_MOTOR.run_forever(duty_cycle_sp=40)
+	ROLLER_MOTOR.stop_command = 'brake'
+	ROLLER_MOTOR.run_forever(duty_cycle_sp=-100)
 	waitSensor(PAPER_FEED_SENSOR, PAPER_FEED_EMPTY_COLOR, negate=True)
-	ROLLER_MOTOR.run_forever(duty_cycle_sp=-15)
+	ROLLER_MOTOR.run_forever(duty_cycle_sp=100)
 	waitSensor(PAPER_FEED_SENSOR, PAPER_FEED_EMPTY_COLOR)
-	ROLLER_MOTOR.run_to_rel_pos(position_sp=-90, duty_cycle_sp=15)
+	ROLLER_MOTOR.run_to_rel_pos(position_sp=1500, duty_cycle_sp=100)
 	waitMotor(ROLLER_MOTOR)
 
 	ROLLER_MOTOR.reset()
@@ -185,9 +188,9 @@ def feedPaper():
 
 def unfeedPaper():
 	'''Cancel operation, return paper to starting position.'''
-	ROLLER_MOTOR.run_forever(duty_cycle_sp=-40)
+	ROLLER_MOTOR.run_forever(duty_cycle_sp=100)
 	waitSensor(PAPER_FEED_SENSOR, PAPER_FEED_EMPTY_COLOR)
-	ROLLER_MOTOR.run_to_rel_pos(position_sp=-120, duty_cycle_sp=25)
+	ROLLER_MOTOR.run_to_rel_pos(position_sp=3500, duty_cycle_sp=100)
 	waitMotor(ROLLER_MOTOR)
 
 def beep(beepType='ok'):
@@ -205,7 +208,7 @@ def beep(beepType='ok'):
 	elif beepType == 'done':
 		SPEAKER.tone([(2000, 70, 30), (3000, 70, 30), (4000, 200, 0)]).wait()
 
-def gotoXY(x, y):
+def gotoXY(x, y, bcm=True):
 	'''
 	Positions the plotter head at the specified coordinate.
 	(0,0) is at the top-left corner of the paper.
@@ -222,45 +225,30 @@ def gotoXY(x, y):
 	if y > MAX_Y:
 		y = MAX_Y
 
-	maxDCX = 35
-	maxDCY = 32
-	minDCX = 10
-	minDCY = 8
+	dx = abs(x - PLOTTER_RAIL_MOTOR.position)
+	dy = abs(y + ROLLER_MOTOR.position)
 
-	dx = abs(PLOTTER_RAIL_MOTOR.position - x)
-	dy = abs(ROLLER_MOTOR.position - y)
-
-	if dx > dy:
-		dcx = maxDCX
-		if dx > 0:
-			dcy = maxDCY * dy / dx 
+	if bcm:
+		if(y > -ROLLER_MOTOR.position):
+			bcmy = 100
 		else:
-			dcy = maxDCY
-	else:
-		dcy = maxDCY
-		if dy > 0:
-			dcx = maxDCX * dx / dy
-		else:
-			dcx = maxDCX
-
-	if dcx < minDCX:
-		dcx = minDCX
-	if dcy < minDCY:
-		dcy = minDCY
+			bcmy = -100
+		ROLLER_MOTOR.position += bcmy
 
 	if dy > 0:
-		ROLLER_MOTOR.run_to_abs_pos(position_sp=y, duty_cycle_sp=dcy)
+		ROLLER_MOTOR.run_to_abs_pos(position_sp=-y, duty_cycle_sp=100)
 	if dx > 0:
-		PLOTTER_RAIL_MOTOR.run_to_abs_pos(position_sp=x, duty_cycle_sp=dcx)
+		PLOTTER_RAIL_MOTOR.run_to_abs_pos(position_sp=x, duty_cycle_sp=30)
 	if dy > 0:
 		waitMotor(ROLLER_MOTOR)
 	if dx > 0:
 		waitMotor(PLOTTER_RAIL_MOTOR)
+	time.sleep(0.5)
 
 def convertCameraCoordinates(cameraX, cameraY):
 	'''Converts camera coordinates (in pixels) to plotter coordinates (in degrees).'''
 	pcx = round((cameraX - 124) * 0.802)
-	pcy = round(((cameraY - 30) * 0.7171) + 100)
+	pcy = round(((cameraY - 30) * 16,391) + 3000)
 	return (pcx, pcy)
 
 def drawDigit(digit, x, y, width, height):
@@ -326,7 +314,7 @@ def drawDigit(digit, x, y, width, height):
 		gotoXY(x, y)
 		plotterHeadDown()
 		gotoXY(x+width, y)
-		gotoXY(x, y+height)
+		gotoXY(x+width/1.5, y+height)
 	elif digit == 8:
 		gotoXY(x, y)
 		plotterHeadDown()
