@@ -133,6 +133,7 @@ def plotterHeadUp(halfRaise=True):
 	else:
 		PLOTTER_HEAD_MOTOR.run_timed(time_sp=800, duty_cycle_sp=-50)
 	waitMotor(PLOTTER_HEAD_MOTOR, breakOnStall=True, stallSpeed=30)
+	time.sleep(0.5)
 
 def plotterHeadDown():
 	'''Presses the plotter head down.'''
@@ -247,8 +248,8 @@ def gotoXY(x, y, bcm=True):
 
 def convertCameraCoordinates(cameraX, cameraY):
 	'''Converts camera coordinates (in pixels) to plotter coordinates (in degrees).'''
-	pcx = round((cameraX - 90) * 0.800)
-	pcy = round(((cameraY - 30) * 16.375) + 2100)
+	pcx = round((cameraX - 96) * 0.800)
+	pcy = round(((cameraY - 30) * 16.350) + 1900)
 	return (pcx, pcy)
 
 def drawDigit(digit, x, y, width, height):
@@ -419,8 +420,10 @@ def sudokuToGrid(sudoku, mask):
 					grid[cr+3][cc+2] = 1
 					grid[cr+1][cc] = 1
 				elif sudoku[i][j] == 7:
-					for k in range(5):
+					for k in range(3):
 						grid[cr+k][cc+2] = 1
+					grid[cr+3][cc+1] = 1
+					grid[cr+4][cc+1] = 1
 					grid[cr][cc] = 1
 					grid[cr][cc+1] = 1
 				elif sudoku[i][j] == 8:
