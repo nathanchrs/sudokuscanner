@@ -248,7 +248,7 @@ def gotoXY(x, y, bcm=True):
 
 def convertCameraCoordinates(cameraX, cameraY):
 	'''Converts camera coordinates (in pixels) to plotter coordinates (in degrees).'''
-	pcx = round((cameraX - 96) * 0.825)
+	pcx = round((cameraX - 96) * 0.855)
 	pcy = round(((cameraY - 30) * 16.450) + 1900)
 	return (pcx, pcy)
 
@@ -361,7 +361,7 @@ def printGrid(grid, x, y, width, height):
 				segments.append([cstart, j])
 			prev = grid[i][j]
 		if (prev == 1):
-			segments.append([cstart, col-1])
+			segments.append([cstart, col])
 		for j in range(len(segments)):
 			segStartX = x+segments[j][0]*dx
 			segEndX = x+segments[j][1]*dx

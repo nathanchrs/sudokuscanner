@@ -144,5 +144,6 @@ if __name__ == '__main__':
 		
 		plotter.printGrid(plotter.sudokuToGrid(sudoku, originalSudoku), sudokuX, sudokuY, sudokuWidth, sudokuHeight)
 
+		plotter.unfeedPaper()
 		plotter.reset()
 		plotter.beep('done')
