@@ -249,7 +249,7 @@ def gotoXY(x, y, bcm=True):
 def convertCameraCoordinates(cameraX, cameraY):
 	'''Converts camera coordinates (in pixels) to plotter coordinates (in degrees).'''
 	pcx = round((cameraX - 96) * 0.855)
-	pcy = round(((cameraY - 30) * 16.450) + 1900)
+	pcy = round(((cameraY - 30) * 16.500) + 1900)
 	return (pcx, pcy)
 
 def drawDigit(digit, x, y, width, height):
