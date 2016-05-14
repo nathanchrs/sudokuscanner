@@ -230,9 +230,9 @@ def gotoXY(x, y, bcm=True):
 
 	if bcm:
 		if(y > -ROLLER_MOTOR.position):
-			bcmy = 100
+			bcmy = 200
 		else:
-			bcmy = -100
+			bcmy = -200
 		ROLLER_MOTOR.position += bcmy
 
 	if dy > 0:
@@ -247,8 +247,8 @@ def gotoXY(x, y, bcm=True):
 
 def convertCameraCoordinates(cameraX, cameraY):
 	'''Converts camera coordinates (in pixels) to plotter coordinates (in degrees).'''
-	pcx = round((cameraX - 124) * 0.802)
-	pcy = round(((cameraY - 30) * 16.391) + 2500)
+	pcx = round((cameraX - 95) * 0.802)
+	pcy = round(((cameraY - 30) * 16.381) + 2400)
 	return (pcx, pcy)
 
 def drawDigit(digit, x, y, width, height):
@@ -270,9 +270,9 @@ def drawDigit(digit, x, y, width, height):
 		gotoXY(x, y)
 		plotterHeadDown()
 		gotoXY(x+width, y)
-		gotoXY(x+width, y+height/2)
+		gotoXY(x+width, y+height/2, bcm=False)
 		gotoXY(x, y+height/2)
-		gotoXY(x, y+height)
+		gotoXY(x, y+height, bcm=False)
 		gotoXY(x+width, y+height)
 	elif digit == 3:
 		gotoXY(x, y)
@@ -298,9 +298,9 @@ def drawDigit(digit, x, y, width, height):
 		gotoXY(x+width, y)
 		plotterHeadDown()
 		gotoXY(x, y)
-		gotoXY(x, y+height/2)
+		gotoXY(x, y+height/2, bcm=False)
 		gotoXY(x+width, y+height/2)
-		gotoXY(x+width, y+height)
+		gotoXY(x+width, y+height, bcm=False)
 		gotoXY(x, y+height)
 	elif digit == 6:
 		gotoXY(x+width, y)

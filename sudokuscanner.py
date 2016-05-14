@@ -148,11 +148,6 @@ if __name__ == '__main__':
 		sudokuDigitWidth = sudokuWidth * 0.06
 		sudokuDigitHeight = sudokuHeight * 0.08
 
-		plotter.SPEAKER.speak('X ' + str(sudokuX)).wait()
-		plotter.SPEAKER.speak('Y ' + str(sudokuY)).wait()
-		plotter.SPEAKER.speak('Width ' + str(sudokuWidth)).wait()
-		plotter.SPEAKER.speak('Height ' + str(sudokuHeight)).wait()
-
 		# draw digits
 
 		for i in range(9):
