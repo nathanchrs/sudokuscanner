@@ -262,9 +262,8 @@ def drawDigit(digit, x, y, width, height):
 		gotoXY(x+width, y)
 		gotoXY(x, y)
 	elif digit == 1:
-		gotoXY(x+width/3, y+height/5)
-		plotterHeadDown()
 		gotoXY(x+width/2, y)
+		plotterHeadDown()
 		gotoXY(x+width/2, y+height)
 	elif digit == 2:
 		gotoXY(x, y)
@@ -314,7 +313,7 @@ def drawDigit(digit, x, y, width, height):
 		gotoXY(x, y)
 		plotterHeadDown()
 		gotoXY(x+width, y)
-		gotoXY(x+width/1.5, y+height)
+		gotoXY(x+width, y+height)
 	elif digit == 8:
 		gotoXY(x, y)
 		plotterHeadDown()
