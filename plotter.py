@@ -248,8 +248,8 @@ def gotoXY(x, y, bcm=True):
 
 def convertCameraCoordinates(cameraX, cameraY):
 	'''Converts camera coordinates (in pixels) to plotter coordinates (in degrees).'''
-	pcx = round((cameraX - 96) * 0.800)
-	pcy = round(((cameraY - 30) * 16.350) + 1900)
+	pcx = round((cameraX - 96) * 0.825)
+	pcy = round(((cameraY - 30) * 16.450) + 1900)
 	return (pcx, pcy)
 
 def drawDigit(digit, x, y, width, height):
@@ -361,7 +361,7 @@ def printGrid(grid, x, y, width, height):
 				segments.append([cstart, j])
 			prev = grid[i][j]
 		if (prev == 1):
-			segments.append([cstart, j])
+			segments.append([cstart, col-1])
 		for j in range(len(segments)):
 			segStartX = x+segments[j][0]*dx
 			segEndX = x+segments[j][1]*dx
@@ -369,8 +369,8 @@ def printGrid(grid, x, y, width, height):
 			plotterHeadDown()
 			gotoXY(segEndX, y+i*dy, bcm=False)
 			plotterHeadUp()
-		gotoXY(x+width+20, y+i*dy, bcm=False)
-		gotoXY(x+width+20, y+(i+1)*dy, bcm=False)
+		gotoXY(x+width+10, y+i*dy, bcm=False)
+		gotoXY(x+width+10, y+(i+1)*dy, bcm=False)
 
 def sudokuToGrid(sudoku, mask):
 	'''Converts a sudoku puzzle to grid format. Only convert digits which corresponding mask is 0.'''
