@@ -247,8 +247,8 @@ def gotoXY(x, y, bcm=True):
 
 def convertCameraCoordinates(cameraX, cameraY):
 	'''Converts camera coordinates (in pixels) to plotter coordinates (in degrees).'''
-	pcx = round((cameraX - 95) * 0.802)
-	pcy = round(((cameraY - 30) * 16.381) + 2400)
+	pcx = round((cameraX - 90) * 0.800)
+	pcy = round(((cameraY - 30) * 16.375) + 2100)
 	return (pcx, pcy)
 
 def drawDigit(digit, x, y, width, height):
@@ -269,9 +269,9 @@ def drawDigit(digit, x, y, width, height):
 		gotoXY(x, y)
 		plotterHeadDown()
 		gotoXY(x+width, y)
-		gotoXY(x+width, y+height/2, bcm=False)
+		gotoXY(x+width, y+height/2)
 		gotoXY(x, y+height/2)
-		gotoXY(x, y+height, bcm=False)
+		gotoXY(x, y+height)
 		gotoXY(x+width, y+height)
 	elif digit == 3:
 		gotoXY(x, y)
@@ -297,9 +297,9 @@ def drawDigit(digit, x, y, width, height):
 		gotoXY(x+width, y)
 		plotterHeadDown()
 		gotoXY(x, y)
-		gotoXY(x, y+height/2, bcm=False)
+		gotoXY(x, y+height/2)
 		gotoXY(x+width, y+height/2)
-		gotoXY(x+width, y+height, bcm=False)
+		gotoXY(x+width, y+height)
 		gotoXY(x, y+height)
 	elif digit == 6:
 		gotoXY(x+width, y)
@@ -334,3 +334,111 @@ def drawDigit(digit, x, y, width, height):
 		gotoXY(x+width, y+height)
 		gotoXY(x, y+height)
 	plotterHeadUp()
+
+def printGrid(grid, x, y, width, height):
+	'''Prints an image as contained on the 0-1 grid.'''
+	row = len(grid)
+	if row > 0:
+		col = len(grid[0])
+
+	dx = int(width/col)
+	dy = int(height/row)
+
+	plotterHeadUp()
+	gotoXY(x-20, y-100) # backlash compensation
+	gotoXY(x, y)
+
+	for i in range(row):
+		gotoXY(x-20, y+i*dy, bcm=False)
+		segments = []
+		cstart = 0
+		prev = 0
+		for j in range(col):
+			if (prev == 0) and (grid[i][j] == 1): # start of a segment
+				cstart = j
+			elif (prev == 1) and (grid[i][j] == 0): # end of a segment
+				segments.append([cstart, j])
+			prev = grid[i][j]
+		if (prev == 1):
+			segments.append([cstart, j])
+		for j in range(len(segments)):
+			segStartX = x+segments[j][0]*dx
+			segEndX = x+segments[j][1]*dx
+			gotoXY(segStartX, y+i*dy, bcm=False)
+			plotterHeadDown()
+			gotoXY(segEndX, y+i*dy, bcm=False)
+			plotterHeadUp()
+		gotoXY(x+width+20, y+i*dy, bcm=False)
+		gotoXY(x+width+20, y+(i+1)*dy, bcm=False)
+
+def sudokuToGrid(sudoku, mask):
+	'''Converts a sudoku puzzle to grid format. Only convert digits which corresponding mask is 0.'''
+	grid = [[0 for j in range(43)] for i in range(61)]
+	for i in range(9):
+		for j in range(9):
+			if mask[i][j] == 0:
+				cr = i*7
+				cc = j*5
+
+				if sudoku[i][j] == 1:
+					for k in range(5):
+						grid[cr+k][cc+1] = 1
+				elif sudoku[i][j] == 2:
+					for k in range(3):
+						grid[cr][cc+k] = 1
+						grid[cr+2][cc+k] = 1
+						grid[cr+4][cc+k] = 1
+					grid[cr+3][cc] = 1
+					grid[cr+1][cc+2] = 1
+				elif sudoku[i][j] == 3:
+					for k in range(3):
+						grid[cr][cc+k] = 1
+						grid[cr+2][cc+k] = 1
+						grid[cr+4][cc+k] = 1
+					grid[cr+3][cc+2] = 1
+					grid[cr+1][cc+2] = 1
+				elif sudoku[i][j] == 4:
+					for k in range(3):
+						grid[cr+k][cc] = 1
+					for k in range(5):
+						grid[cr+k][cc+2] = 1
+					grid[cr+2][cc+1] = 1
+				elif sudoku[i][j] == 5:
+					for k in range(3):
+						grid[cr][cc+k] = 1
+						grid[cr+2][cc+k] = 1
+						grid[cr+4][cc+k] = 1
+					grid[cr+3][cc+2] = 1
+					grid[cr+1][cc] = 1
+				elif sudoku[i][j] == 6:
+					for k in range(3):
+						grid[cr][cc+k] = 1
+						grid[cr+2][cc+k] = 1
+						grid[cr+4][cc+k] = 1
+					grid[cr+3][cc] = 1
+					grid[cr+3][cc+2] = 1
+					grid[cr+1][cc] = 1
+				elif sudoku[i][j] == 7:
+					for k in range(5):
+						grid[cr+k][cc+2] = 1
+					grid[cr][cc] = 1
+					grid[cr][cc+1] = 1
+				elif sudoku[i][j] == 8:
+					for k in range(3):
+						grid[cr][cc+k] = 1
+						grid[cr+2][cc+k] = 1
+						grid[cr+4][cc+k] = 1
+					grid[cr+3][cc] = 1
+					grid[cr+1][cc] = 1
+					grid[cr+3][cc+2] = 1
+					grid[cr+1][cc+2] = 1
+				elif sudoku[i][j] == 9:
+					for k in range(3):
+						grid[cr][cc+k] = 1
+						grid[cr+2][cc+k] = 1
+						grid[cr+4][cc+k] = 1
+					grid[cr+1][cc] = 1
+					grid[cr+3][cc+2] = 1
+					grid[cr+1][cc+2] = 1
+
+	return grid

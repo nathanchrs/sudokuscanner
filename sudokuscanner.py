@@ -141,19 +141,8 @@ if __name__ == '__main__':
 		sudokuY = (sudokuTopLeftY + sudokuTopRightY) / 2.0 + offsetY
 		sudokuWidth = (sudokuTopRightX + sudokuBottomRightX - sudokuTopLeftX - sudokuBottomLeftX) / 2.0
 		sudokuHeight = (sudokuBottomLeftY + sudokuBottomRightY - sudokuTopLeftY - sudokuTopRightY) / 2.0
-		sudokuCellWidth = sudokuWidth / 9.0
-		sudokuCellHeight = sudokuHeight / 9.0
-		sudokuCellPaddingX = sudokuWidth * 0.02
-		sudokuCellPaddingY = sudokuHeight * 0.01
-		sudokuDigitWidth = sudokuWidth * 0.06
-		sudokuDigitHeight = sudokuHeight * 0.08
-
-		# draw digits
-
-		for i in range(9):
-			for j in range(9):
-				if originalSudoku[i][j] == 0:
-					plotter.drawDigit(solvedSudoku[i][j], sudokuX + j*sudokuCellWidth + sudokuCellPaddingX, sudokuY + i*sudokuCellHeight + sudokuCellPaddingY, sudokuDigitWidth, sudokuDigitHeight)
+		
+		plotter.printGrid(plotter.sudokuToGrid(sudoku, originalSudoku), sudokuX, sudokuY, sudokuWidth, sudokuHeight)
 
 		plotter.reset()
 		plotter.beep('done')
