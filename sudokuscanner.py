@@ -43,7 +43,7 @@ if __name__ == '__main__':
 				plotter.ROLLER_MOTOR.run_forever(duty_cycle_sp=-100)
 			elif plotter.BUTTON.enter:
 				plotter.ROLLER_MOTOR.stop()
-				offsetY = -plotter.ROLLER_MOTOR.position
+				offsetY = plotter.MAX_Y + plotter.ROLLER_MOTOR.position
 				plotter.beep('ok')
 				break
 			elif plotter.BUTTON.backspace:
@@ -88,6 +88,8 @@ if __name__ == '__main__':
 			plotter.beep('warning')
 			plotter.waitButton(buttonType='any')
 			continue
+
+		cam.release()
 
 		# solve sudoku
 
@@ -136,22 +138,27 @@ if __name__ == '__main__':
 		sudokuTopRightX, sudokuTopRightY = plotter.convertCameraCoordinates(sudokuPosition[3][0], sudokuPosition[3][1])
 
 		sudokuX = (sudokuTopLeftX + sudokuBottomLeftX) / 2.0
-		sudokuY = (sudokuTopLeftY + sudokuTopRightY) / 2.0
+		sudokuY = (sudokuTopLeftY + sudokuTopRightY) / 2.0 + offsetY
 		sudokuWidth = (sudokuTopRightX + sudokuBottomRightX - sudokuTopLeftX - sudokuBottomLeftX) / 2.0
 		sudokuHeight = (sudokuBottomLeftY + sudokuBottomRightY - sudokuTopLeftY - sudokuTopRightY) / 2.0
 		sudokuCellWidth = sudokuWidth / 9.0
 		sudokuCellHeight = sudokuHeight / 9.0
 		sudokuCellPaddingX = sudokuWidth * 0.02
 		sudokuCellPaddingY = sudokuHeight * 0.01
-		sudokuDigitWidth = sudokuHeight * 0.06
+		sudokuDigitWidth = sudokuWidth * 0.06
 		sudokuDigitHeight = sudokuHeight * 0.08
+
+		plotter.SPEAKER.speak('X ' + str(sudokuX)).wait()
+		plotter.SPEAKER.speak('Y ' + str(sudokuY)).wait()
+		plotter.SPEAKER.speak('Width ' + str(sudokuWidth)).wait()
+		plotter.SPEAKER.speak('Height ' + str(sudokuHeight)).wait()
 
 		# draw digits
 
 		for i in range(9):
 			for j in range(9):
 				if originalSudoku[i][j] == 0:
-					plotter.drawDigit(solvedSudoku[i][j], sudokuX + j*sudokuCellWidth + sudokuCellPaddingX, sudokuY + i*sudokuCellHeight + sudokuCellPaddingY + offsetY, sudokuDigitWidth, sudokuDigitHeight)
+					plotter.drawDigit(solvedSudoku[i][j], sudokuX + j*sudokuCellWidth + sudokuCellPaddingX, sudokuY + i*sudokuCellHeight + sudokuCellPaddingY, sudokuDigitWidth, sudokuDigitHeight)
 
 		plotter.reset()
 		plotter.beep('done')
