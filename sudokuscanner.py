@@ -37,13 +37,13 @@ if __name__ == '__main__':
 
 		cancelOperation = False
 		while True:
-			if plotter.BUTTON.left and (plotter.ROLLER_MOTOR.position > 0):
+			if plotter.BUTTON.left and (-plotter.ROLLER_MOTOR.position > 0):
 				plotter.ROLLER_MOTOR.run_forever(duty_cycle_sp=100)
-			elif plotter.BUTTON.right and (plotter.ROLLER_MOTOR.position < plotter.MAX_Y):
+			elif plotter.BUTTON.right and (-plotter.ROLLER_MOTOR.position < plotter.MAX_Y):
 				plotter.ROLLER_MOTOR.run_forever(duty_cycle_sp=-100)
 			elif plotter.BUTTON.enter:
 				plotter.ROLLER_MOTOR.stop()
-				offsetY = plotter.ROLLER_MOTOR.position
+				offsetY = -plotter.ROLLER_MOTOR.position
 				plotter.beep('ok')
 				break
 			elif plotter.BUTTON.backspace:
