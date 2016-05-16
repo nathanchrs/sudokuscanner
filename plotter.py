@@ -133,13 +133,13 @@ def plotterHeadUp(halfRaise=True):
 	else:
 		PLOTTER_HEAD_MOTOR.run_timed(time_sp=800, duty_cycle_sp=-50)
 	waitMotor(PLOTTER_HEAD_MOTOR, breakOnStall=True, stallSpeed=30)
-	time.sleep(0.5)
+	time.sleep(0.2)
 
 def plotterHeadDown():
 	'''Presses the plotter head down.'''
 	PLOTTER_HEAD_MOTOR.run_timed(time_sp=800, duty_cycle_sp=50)
 	waitMotor(PLOTTER_HEAD_MOTOR, breakOnStall=True, stallSpeed=30)
-	time.sleep(0.5)
+	time.sleep(0.2)
 
 def reset():
 	'''Resets plotter rail, head and roller positions.'''
@@ -249,7 +249,7 @@ def gotoXY(x, y, bcm=True):
 def convertCameraCoordinates(cameraX, cameraY):
 	'''Converts camera coordinates (in pixels) to plotter coordinates (in degrees).'''
 	pcx = round((cameraX - 96) * 0.855)
-	pcy = round(((cameraY - 30) * 16.500) + 1900)
+	pcy = round(((cameraY - 30) * 16.540) + 1900)
 	return (pcx, pcy)
 
 def drawDigit(digit, x, y, width, height):
