@@ -34,7 +34,7 @@ There are trainer programs to help generate datasets:
 This project uses the following open source components:
 
 - ev3dev - Debian Linux for LEGO MINDSTORMS EV3, license (GNU GPL v2): https://github.com/ev3dev/ev3dev/blob/master/LICENSE
-- ev3dev Python language bindings
+- ev3dev Python language bindings: https://github.com/rhempel/ev3dev-lang-python
 - OpenCV 2.4.12 - Open Source Computer Vision Library, license (3-clause BSD License): http://opencv.org/license.html
 
 Handwritten digit training uses samples from MNIST: http://yann.lecun.com/exdb/mnist/
@@ -51,3 +51,4 @@ Sudoku digit samples uses sudoku puzzle images from Google Image Search.
 - http://norvig.com/sudoku.html
 - http://www.math.cornell.edu/~mec/Summer2009/meerkamp/Site/Solving_any_Sudoku_II.html
 - http://docs.opencv.org/3.1.0/dd/d49/tutorial_py_contour_features.html#gsc.tab=0
+- http://ev3dev-lang-python.readthedocs.io/en/latest/

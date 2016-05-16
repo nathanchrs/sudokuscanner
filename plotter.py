@@ -33,7 +33,7 @@ WEBCAM_NUMBER = 0 # USB webcam
 PAPER_FEED_EMPTY_COLOR = 1 # black
 MAX_X = 350
 MAX_Y = 16000
-PLOTTER_HEAD_DOWN_DELAY = 0.45
+PLOTTER_HEAD_DOWN_DELAY = 0.445
 
 # color sensor values:
 # - 0: No color
@@ -249,7 +249,7 @@ def gotoXY(x, y, bcm=True):
 
 def convertCameraCoordinates(cameraX, cameraY):
 	'''Converts camera coordinates (in pixels) to plotter coordinates (in degrees).'''
-	pcx = round((cameraX - 96) * 0.855)
+	pcx = round((cameraX - 96) * 0.850)
 	pcy = round(((cameraY - 30) * 16.550) + 1900)
 	return (pcx, pcy)
 
