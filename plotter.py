@@ -33,6 +33,7 @@ WEBCAM_NUMBER = 0 # USB webcam
 PAPER_FEED_EMPTY_COLOR = 1 # black
 MAX_X = 350
 MAX_Y = 16000
+PLOTTER_HEAD_DOWN_DELAY = 0.45
 
 # color sensor values:
 # - 0: No color
@@ -129,17 +130,17 @@ def waitButton(buttonType='any', mode='pressed'):
 def plotterHeadUp(halfRaise=True):
 	'''Raises the plotter head. If halfRaise is True, the plotter head will only be lifted a bit to reduce time needed.'''
 	if halfRaise:
-		PLOTTER_HEAD_MOTOR.run_timed(time_sp=200, duty_cycle_sp=-50)
+		PLOTTER_HEAD_MOTOR.run_timed(time_sp=400, duty_cycle_sp=-50)
 	else:
 		PLOTTER_HEAD_MOTOR.run_timed(time_sp=800, duty_cycle_sp=-50)
 	waitMotor(PLOTTER_HEAD_MOTOR, breakOnStall=True, stallSpeed=30)
-	time.sleep(0.2)
+	time.sleep(PLOTTER_HEAD_DOWN_DELAY)
 
 def plotterHeadDown():
 	'''Presses the plotter head down.'''
 	PLOTTER_HEAD_MOTOR.run_timed(time_sp=800, duty_cycle_sp=50)
 	waitMotor(PLOTTER_HEAD_MOTOR, breakOnStall=True, stallSpeed=30)
-	time.sleep(0.2)
+	time.sleep(PLOTTER_HEAD_DOWN_DELAY)
 
 def reset():
 	'''Resets plotter rail, head and roller positions.'''
@@ -249,7 +250,7 @@ def gotoXY(x, y, bcm=True):
 def convertCameraCoordinates(cameraX, cameraY):
 	'''Converts camera coordinates (in pixels) to plotter coordinates (in degrees).'''
 	pcx = round((cameraX - 96) * 0.855)
-	pcy = round(((cameraY - 30) * 16.540) + 1900)
+	pcy = round(((cameraY - 30) * 16.550) + 1900)
 	return (pcx, pcy)
 
 def drawDigit(digit, x, y, width, height):
