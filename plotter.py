@@ -374,7 +374,7 @@ def printGrid(grid, x, y, width, height):
 
 def sudokuToGrid(sudoku, mask):
 	'''Converts a sudoku puzzle to grid format. Only convert digits which corresponding mask is 0.'''
-	grid = [[0 for j in range(43)] for i in range(61)]
+	grid = [[0 for j in range(44)] for i in range(61)]
 	for i in range(9):
 		for j in range(9):
 			if mask[i][j] == 0:
@@ -390,14 +390,14 @@ def sudokuToGrid(sudoku, mask):
 						grid[cr+2][cc+k] = 1
 						grid[cr+4][cc+k] = 1
 					grid[cr+3][cc] = 1
-					grid[cr+1][cc+2] = 1
+					grid[cr+1][cc+3] = 1
 				elif sudoku[i][j] == 3:
 					for k in range(3):
 						grid[cr][cc+k] = 1
 						grid[cr+2][cc+k] = 1
 						grid[cr+4][cc+k] = 1
-					grid[cr+3][cc+2] = 1
-					grid[cr+1][cc+2] = 1
+					grid[cr+3][cc+3] = 1
+					grid[cr+1][cc+3] = 1
 				elif sudoku[i][j] == 4:
 					for k in range(3):
 						grid[cr+k][cc] = 1
@@ -409,7 +409,7 @@ def sudokuToGrid(sudoku, mask):
 						grid[cr][cc+k] = 1
 						grid[cr+2][cc+k] = 1
 						grid[cr+4][cc+k] = 1
-					grid[cr+3][cc+2] = 1
+					grid[cr+3][cc+3] = 1
 					grid[cr+1][cc] = 1
 				elif sudoku[i][j] == 6:
 					for k in range(3):
@@ -417,7 +417,7 @@ def sudokuToGrid(sudoku, mask):
 						grid[cr+2][cc+k] = 1
 						grid[cr+4][cc+k] = 1
 					grid[cr+3][cc] = 1
-					grid[cr+3][cc+2] = 1
+					grid[cr+3][cc+3] = 1
 					grid[cr+1][cc] = 1
 				elif sudoku[i][j] == 7:
 					for k in range(3):
@@ -433,15 +433,15 @@ def sudokuToGrid(sudoku, mask):
 						grid[cr+4][cc+k] = 1
 					grid[cr+3][cc] = 1
 					grid[cr+1][cc] = 1
-					grid[cr+3][cc+2] = 1
-					grid[cr+1][cc+2] = 1
+					grid[cr+3][cc+3] = 1
+					grid[cr+1][cc+3] = 1
 				elif sudoku[i][j] == 9:
 					for k in range(3):
 						grid[cr][cc+k] = 1
 						grid[cr+2][cc+k] = 1
 						grid[cr+4][cc+k] = 1
 					grid[cr+1][cc] = 1
-					grid[cr+3][cc+2] = 1
-					grid[cr+1][cc+2] = 1
+					grid[cr+3][cc+3] = 1
+					grid[cr+1][cc+3] = 1
 
 	return grid
