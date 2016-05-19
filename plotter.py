@@ -33,7 +33,7 @@ WEBCAM_NUMBER = 0 # USB webcam
 PAPER_FEED_EMPTY_COLOR = 1 # black
 MAX_X = 350
 MAX_Y = 16000
-PLOTTER_HEAD_DOWN_DELAY = 0.445
+PLOTTER_HEAD_DOWN_DELAY = 0.450
 
 # color sensor values:
 # - 0: No color
