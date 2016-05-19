@@ -142,7 +142,7 @@ if __name__ == '__main__':
 		sudokuWidth = (sudokuTopRightX + sudokuBottomRightX - sudokuTopLeftX - sudokuBottomLeftX) / 2.0
 		sudokuHeight = (sudokuBottomLeftY + sudokuBottomRightY - sudokuTopLeftY - sudokuTopRightY) / 2.0
 		
-		plotter.printGrid(plotter.sudokuToGrid(sudoku, originalSudoku), sudokuX, sudokuY, sudokuWidth, sudokuHeight)
+		plotter.printGrid(plotter.sudokuToGrid(solvedSudoku, originalSudoku), sudokuX, sudokuY, sudokuWidth, sudokuHeight)
 
 		plotter.unfeedPaper()
 		plotter.reset()

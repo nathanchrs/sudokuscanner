@@ -6,7 +6,8 @@ By nathanchrs.
 
 ## Modules
 
-- `sudokusolver`: sudoku puzzle checker and solver logic.
+- `sudokuscanner.py`: main program, run this program from EV3.
+- `sudokusolver.py`: sudoku puzzle checker and solver logic.
 - `sudokucapture.py`: reads a sudoku puzzle from an image.
 - `opencv_functions.py`: contains miscellaneous image processing functions from the OpenCV 2.4.12 Python 2 samples (`common.py` and `digits.py`).
 - `digitcapture.py`: reads free-standing digits from an image (currently the image must be clean and only contain the numbers).
